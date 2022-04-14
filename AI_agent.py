@@ -14,12 +14,14 @@ BACH_SIZE = 1000
 LR = 0.001
 
 class ai_agent:
-    def __init__(self) -> None:
+    def __init__(self,state_dict=None) -> None:
         self.n_games = 0
         self.epsilon = 0 # randomness
         self.gamma = 0.9 #discont rate
         self.memory = deque(maxlen=MAX_MEMORY) # pop left
-        self.model = QNet(12,4,256)
+        self.model = QNet(8,4,256)
+        if state_dict:
+            self.model.load_state_dict(torch.load(state_dict))
         self.trainer = QTrainer(self.model)
 
     def remember(self,state,action,reward,next_state,done):
@@ -66,11 +68,13 @@ class ai_agent:
         return final_move
 
 def train():
+    plot_caught_foods=[]
     plot_scores=[]
     plot_mean_scores = []
     total_score = 0
     record = 0
     agent = ai_agent()
+    # agent = ai_agent("QNet_model.pth")
     game = snake_game()
 
     while True:
@@ -79,7 +83,7 @@ def train():
 
         final_move = agent.get_action(state_old)
         game.game_draw()
-        reward, done, score = game.game_step_ai(final_move)
+        reward, done, score,caught_foods = game.game_step_ai(final_move)
         state_new = game.inputs_AI()
 
         agent.train_short_memory(state_old,final_move,reward,state_new,done)
@@ -101,7 +105,8 @@ def train():
             total_score += score
             mean_score = total_score/ agent.n_games
             plot_mean_scores.append(mean_score)
-            plot(plot_scores,plot_mean_scores)
+            plot_caught_foods.append(caught_foods)
+            plot(plot_scores,plot_mean_scores,plot_caught_foods)
         # time.sleep(0.05)
 
 def play():
@@ -114,7 +119,7 @@ def play():
         state = game.inputs_AI()
         final_move = agent.get_play_action(state)
         game.game_draw()
-        _ , done, _ = game.game_step_ai(final_move)
+        _ , done, _,_ = game.game_step_ai(final_move)
         if done: 
             game.reset()
         time.sleep(0.1)

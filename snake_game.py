@@ -17,6 +17,7 @@ class Snake:
         self.stamina_base = int(self.screen_size[0]/self.section_size)*int(self.screen_size[1]/self.section_size)
         self.stamina = self.stamina_base
         self.score=0
+        self.caught_foods=0
         
     def draw_snake(self,screen):
         for section in self.body_sections:
@@ -46,8 +47,8 @@ class Snake:
         self.stamina -=1
 
 class snake_game:
-    def __init__(self,width:int=1000,height:int=1000,blackgrond_color=(0, 0, 0),
-                section_size=50,food_color=(255,0,0)) -> None:
+    def __init__(self,width:int=800,height:int=800,blackgrond_color=(0, 0, 0),
+                section_size=25,food_color=(255,0,0)) -> None:
         pygame.init()
         pygame.font.init()
         self.size = self.width, self.height =  width,height
@@ -63,6 +64,7 @@ class snake_game:
         self.snake.head_position=[10,10]
         self.snake.body_sections=[]
         self.snake.score=0
+        self.snake.caught_foods=0
         self.snake.stamina=self.snake.stamina_base
         self.snake.speed=[1,0]
 
@@ -86,8 +88,9 @@ class snake_game:
         if self.snake.head_position == self.food:
             self.snake.body_sections.insert(0,self.snake.head_position.copy())
             self.generate_food()
+            self.snake.caught_foods += 1
+            self.snake.score = self.snake.caught_foods*len(self.snake.body_sections)+(self.snake.stamina_base-self.snake.stamina)
             self.snake.stamina = self.snake.stamina_base
-            self.snake.score +=1
             return True
         return False
 
@@ -158,8 +161,8 @@ class snake_game:
         self.snake.draw_snake(self.screen)
         self.draw_food()
 
-        my_font = pygame.font.SysFont('Comic Sans MS', 50)
-        text_surface = my_font.render(f"Score: {self.snake.score} Stamina: {self.snake.stamina}", False, (255, 255, 255))
+        my_font = pygame.font.SysFont('Comic Sans MS', 30)
+        text_surface = my_font.render(f"Score: {self.snake.score} Stamina: {self.snake.stamina} Foods: {self.snake.caught_foods}", False, (255, 255, 255))
         self.screen.blit(text_surface, (0,0))
         pygame.display.update()
         pygame.display.flip()
@@ -179,52 +182,11 @@ class snake_game:
         self.snake.update_snake_position()
         if self.end_game():
             reward=-10
-            return reward,True,self.snake.score
+            return reward,True,self.snake.score,self.snake.caught_foods
         if self.eat_food():
             reward=10
-        return reward,False,self.snake.score
+        return reward,False,self.snake.score,self.snake.caught_foods
 
-    def inputs_AI_V2(self):
-        inputs=[]
-        #danger LEFT
-        value=0
-        for step in range(self.snake.head_position[0],-1,-1):
-            head_mov = [step,self.snake.head_position[1]]
-            if head_mov[0] == 0 or (self.snake.body_sections and head_mov in self.snake.body_sections):
-                value = abs(step-self.snake.head_position[0])
-
-        inputs.append(value)
-
-        #danger RIGHT
-        value=0
-        for step in range(self.snake.head_position[0],int(self.width/self.section_size),1):
-            head_mov = [step,self.snake.head_position[1]]
-            if head_mov[0] == int(self.width/self.section_size ) or (self.snake.body_sections and head_mov in self.snake.body_sections):
-                value = abs(step-self.snake.head_position[0])
-
-        inputs.append(value)
-
-        #danger UP
-        value=0
-        for step in range(self.snake.head_position[1],-1,-1):
-            head_mov = [self.snake.head_position[0],step]
-            if head_mov[1] == 0 or (self.snake.body_sections and head_mov in self.snake.body_sections):
-                value = abs(step-self.snake.head_position[1])
-
-        inputs.append(value)
-
-        #danger DOWN
-        value=0
-        for step in range(self.snake.head_position[1],int(self.height/self.section_size),1):
-            head_mov = [self.snake.head_position[0],step]
-            if head_mov[1] == 0 or (self.snake.body_sections and head_mov in self.snake.body_sections):
-                value = abs(step-self.snake.head_position[1])
-
-        inputs.append(value)
-
-        
-        inputs.append(self.food[0]-self.snake.head_position[0])
-        inputs.append(self.food[1]-self.snake.head_position[1])
         return np.array(inputs,dtype=int)
 
     def inputs_AI(self):
@@ -257,23 +219,23 @@ class snake_game:
 
 
 
-        # direction
-        if self.snake.speed[0]==-1:
-            inputs.append(1)
-        else:
-            inputs.append(0)
-        if self.snake.speed[0]==1:
-            inputs.append(1)
-        else:
-            inputs.append(0)
-        if self.snake.speed[1]==-1:
-            inputs.append(1)
-        else:
-            inputs.append(0)
-        if self.snake.speed[1]==1:
-            inputs.append(1)
-        else:
-            inputs.append(0)
+        # # direction
+        # if self.snake.speed[0]==-1:
+        #     inputs.append(1)
+        # else:
+        #     inputs.append(0)
+        # if self.snake.speed[0]==1:
+        #     inputs.append(1)
+        # else:
+        #     inputs.append(0)
+        # if self.snake.speed[1]==-1:
+        #     inputs.append(1)
+        # else:
+        #     inputs.append(0)
+        # if self.snake.speed[1]==1:
+        #     inputs.append(1)
+        # else:
+        #     inputs.append(0)
 
         # food 
         if self.food[0]>self.snake.head_position[0]:
