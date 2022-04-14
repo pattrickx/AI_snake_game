@@ -41,7 +41,7 @@ def draw_snake(screen,head,body):
     rect(screen, head["color"], (x1,y1,section_size,section_size))
 
 def generate_food(head,body):
-    if len(body["sections"])+1 == int(width/section_size)+int(height/section_size):
+    if len(body["sections"])+1 == int(width/section_size)*int(height/section_size):
         print("Vitoria")
         sys.exit()
     food = np.random.randint([int(width/section_size),int(height/section_size)],size=2).tolist()
@@ -150,4 +150,4 @@ while 1:
 
     pygame.display.update()
     pygame.display.flip()
-    time.sleep(0.05)
+    time.sleep(0.1)
