@@ -12,14 +12,11 @@ class QNet(nn.Module):
 
             nn.Linear(in_features=input_size,out_features=hidden_size),
             nn.ReLU(),
-            nn.Dropout(p=0.2),
 
             nn.Linear(in_features=hidden_size,out_features=hidden_size),
             nn.ReLU(),
-            nn.Dropout(p=0.2),
 
-            nn.Linear(in_features=hidden_size,out_features=output_size),
-            nn.ReLU())
+            nn.Linear(in_features=hidden_size,out_features=output_size))
         
     def forward(self, X):
         Y = self.fc(X)
@@ -53,7 +50,6 @@ class QTrainer:
 
         # predict
         pred = self.model(state)
-        
         # part2
         target = pred.clone()
         for idx in range(len(done)):
