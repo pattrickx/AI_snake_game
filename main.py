@@ -7,11 +7,12 @@ pygame.init()
 size = width, height =  1000,1000
 speed = [1, 0]
 blackgrond_color = (0, 0, 0)
-direc=1
 
 screen = pygame.display.set_mode(size)
 
-section_size=50
+SECTION_SIZE=50
+STAMINA_BASE =int(width/SECTION_SIZE)*int(height/SECTION_SIZE)
+stamina = STAMINA_BASE
 head = {"position":{"x":0,"y":0},"color":(0,0,255)}
 body = {"color":(0,255,0),"sections":[]}
 
@@ -32,45 +33,45 @@ def update_snake_position(pos,head,body):
 
 def draw_snake(screen,head,body):
     for section in body["sections"]:
-        x1=section[0]*section_size
-        y1=section[1]*section_size
-        rect(screen,body["color"], (x1,y1,section_size,section_size))
+        x1=section[0]*SECTION_SIZE
+        y1=section[1]*SECTION_SIZE
+        rect(screen,body["color"], (x1,y1,SECTION_SIZE,SECTION_SIZE))
 
-    x1=head["position"]["x"]*section_size
-    y1=head["position"]["y"]*section_size
-    rect(screen, head["color"], (x1,y1,section_size,section_size))
+    x1=head["position"]["x"]*SECTION_SIZE
+    y1=head["position"]["y"]*SECTION_SIZE
+    rect(screen, head["color"], (x1,y1,SECTION_SIZE,SECTION_SIZE))
 
 def generate_food(head,body):
-    if len(body["sections"])+1 == int(width/section_size)*int(height/section_size):
+    if len(body["sections"])+1 == int(width/SECTION_SIZE)*int(height/SECTION_SIZE):
         print("Vitoria")
         sys.exit()
-    food = np.random.randint([int(width/section_size),int(height/section_size)],size=2).tolist()
+    food = np.random.randint([int(width/SECTION_SIZE),int(height/SECTION_SIZE)],size=2).tolist()
     while food in body["sections"] or food == [head["position"]["x"],head["position"]["y"]]:
-        food = np.random.randint([int(width/section_size),int(height/section_size)],size=2).tolist()
+        food = np.random.randint([int(width/SECTION_SIZE),int(height/SECTION_SIZE)],size=2).tolist()
         print(f"{food} tent")
     return food
     
 
 def draw_food(screen,food):
     if food:
-        x1=food[0]*section_size
-        y1=food[1]*section_size
-        rect(screen, (255,0,0), (x1,y1,section_size,section_size))
+        x1=food[0]*SECTION_SIZE
+        y1=food[1]*SECTION_SIZE
+        rect(screen, (255,0,0), (x1,y1,SECTION_SIZE,SECTION_SIZE))
 
-def eat_food(head,food,body):
+def eat_food(head,food,body,stamina):
 
     head_position = [head["position"]["x"],head["position"]["y"]]
     if head_position == food:
         body["sections"].insert(0,[head["position"]["x"],head["position"]["y"]])
-        return generate_food(head,body)   
-    return food
+        return generate_food(head,body),STAMINA_BASE
+    return food,stamina
 
 def end_game(head,body):
 
-    if int(width/section_size)<head["position"]["x"] or head["position"]["x"]<0:
+    if int(width/SECTION_SIZE)<head["position"]["x"] or head["position"]["x"]<0:
         print("derrota")
         sys.exit()
-    if int(height/section_size)<head["position"]["y"] or head["position"]["y"]<0:
+    if int(height/SECTION_SIZE)<head["position"]["y"] or head["position"]["y"]<0:
         print("derrota")
         sys.exit()
     if [head["position"]["x"],head["position"]["y"]] in body["sections"]:
@@ -117,25 +118,25 @@ while 1:
     #     speed[0]=1
     #     speed[1]=0
 
-    # elif head["position"]["x"]*section_size+section_size >= width:
+    # elif head["position"]["x"]*SECTION_SIZE+SECTION_SIZE >= width:
     #     speed[0]=0
     #     speed[1]=1
-    # elif head["position"]["y"]*section_size+section_size >= height:
+    # elif head["position"]["y"]*SECTION_SIZE+SECTION_SIZE >= height:
     #     speed[0]=-1
     #     speed[1]=0
     # elif head["position"]["x"]<=0:
     #     speed[0]=0
     #     speed[1]=-1
 
-    # if head["position"]["x"]*section_size+section_size >= width:
+    # if head["position"]["x"]*SECTION_SIZE+SECTION_SIZE >= width:
     #     direc = 0
     # if head["position"]["x"] <= 0:
     #     direc = 1
-    # base = section_size 
-    # if head["position"]["x"]*section_size+section_size >= width-1:
+    # base = SECTION_SIZE 
+    # if head["position"]["x"]*SECTION_SIZE+SECTION_SIZE >= width-1:
     #     base = 0
 
-    # if head["position"]["y"] <= base or head["position"]["y"]*section_size+section_size >= height:
+    # if head["position"]["y"] <= base or head["position"]["y"]*SECTION_SIZE+SECTION_SIZE >= height:
     #     if speed[0] == 1:
     #         speed[0] = 0
     #         speed[1] = 1 if head["position"]["y"] <= 0 else -1
@@ -144,9 +145,11 @@ while 1:
     #         speed[1] = 0
     end_game(head,body)
 
-    foods = eat_food(head,foods,body)
+    foods,stamina = eat_food(head,foods,body,stamina)
     draw_food(screen,foods)
     draw_snake(screen,head,body)
+    stamina-=1
+    print(stamina)
 
     pygame.display.update()
     pygame.display.flip()
