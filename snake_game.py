@@ -4,7 +4,7 @@ import numpy as np
 import time
 
 
-class snake:
+class Snake:
     def __init__(self,screen_size,head_color=(0,0,255),head_position=[0,0],
                 body_color=(0,255,0),body_sections=[],section_size=50,speed=[1,0]) -> None:
         self.head_color = head_color
@@ -16,6 +16,7 @@ class snake:
         self.screen_size = screen_size
         self.stamina_base = int(self.screen_size[0]/self.section_size)*int(self.screen_size[1]/self.section_size)
         self.stamina = self.stamina_base
+        self.score=0
         
     def draw_snake(self,screen):
         for section in self.body_sections:
@@ -53,8 +54,17 @@ class snake_game:
         self.food_color = food_color
         self.section_size = section_size
         self.screen = pygame.display.set_mode(self.size)
-        self.snake=snake(self.size,section_size=self.section_size)
+        self.snake=Snake(self.size,section_size=self.section_size)
         self.food=[]
+        self.generate_food()
+
+    def reset(self):
+        self.snake.head_position=[0,0]
+        self.snake.body_sections=[]
+        self.snake.score=0
+        self.snake.stamina=self.snake.stamina_base
+        self.snake.speed=[1,0]
+
         self.generate_food()
 
     def generate_food(self):
@@ -76,23 +86,26 @@ class snake_game:
             self.snake.body_sections.insert(0,self.snake.head_position.copy())
             self.generate_food()
             self.snake.stamina = self.snake.stamina_base
+            self.snake.score +=1
             return True
+        return False
 
 
     def end_game(self):
 
         if int(self.width/self.section_size)<self.snake.head_position[0] or self.snake.head_position[0]<0:
             print("derrota 1")
-            sys.exit()
+            return True
         if int(self.height/self.section_size)<self.snake.head_position[1] or self.snake.head_position[1]<0:
             print("derrota 2")
-            sys.exit()
+            return True
         if self.snake.head_position in self.snake.body_sections:
             print("derrota 3")
-            sys.exit()
+            return True
         if self.snake.stamina<0:
             print("derrota 4")
-            sys.exit()
+            return True
+        return False
 
     def first_slice(self,key):
         if not self.snake.body_sections:
@@ -106,7 +119,7 @@ class snake_game:
         elif key == pygame.K_DOWN:
             return self.snake.head_position[1]+1 != self.snake.body_sections[0][1]
 
-    def user_actions(self):
+    def user_action(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
 
@@ -124,6 +137,21 @@ class snake_game:
                     self.snake.speed[0]=0
                     self.snake.speed[1]=1
 
+    def ai_action(self,move):
+        
+        if move[0] == 1 and self.first_slice(pygame.K_LEFT):
+            self.snake.speed[0]=-1
+            self.snake.speed[1]=0
+        elif move[1] == 1 and self.first_slice(pygame.K_RIGHT):
+            self.snake.speed[0]=1
+            self.snake.speed[1]=0
+        elif move[2] == 1 and self.first_slice(pygame.K_UP):
+            self.snake.speed[0]=0
+            self.snake.speed[1]=-1
+        elif move[3] == 1 and self.first_slice(pygame.K_DOWN):
+            self.snake.speed[0]=0
+            self.snake.speed[1]=1
+
     def game_draw(self):
         self.screen.fill(self.blackgrond_color)
         self.snake.draw_snake(self.screen)
@@ -132,12 +160,25 @@ class snake_game:
         pygame.display.flip()
 
     def game_step_user(self):
-        self.user_actions()
+        self.user_action()
         self.snake.update_snake_position()
-        self.end_game()
+        if self.end_game():
+            # sys.exit()
+            self.reset()
         self.eat_food()
         
-        
+    def game_step_ai(self,move):
+        reward=0
+        self.ai_action(move)
+        self.snake.update_snake_position()
+        if self.eat_food():
+            reward=10
+        if self.end_game():
+            reward=-10
+            return reward,True,self.snake.score
+        return reward,False,self.snake.score
+
+
 
     def inputs_AI(self):
         inputs=[]
