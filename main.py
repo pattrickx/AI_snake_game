@@ -66,7 +66,7 @@ def eat_food(head,food,body,stamina):
         return generate_food(head,body),STAMINA_BASE
     return food,stamina
 
-def end_game(head,body):
+def end_game(head,body,stamina):
 
     if int(width/SECTION_SIZE)<head["position"]["x"] or head["position"]["x"]<0:
         print("derrota")
@@ -75,6 +75,9 @@ def end_game(head,body):
         print("derrota")
         sys.exit()
     if [head["position"]["x"],head["position"]["y"]] in body["sections"]:
+        print("derrota")
+        sys.exit()
+    if stamina<0:
         print("derrota")
         sys.exit()
 
@@ -143,7 +146,7 @@ while 1:
     #     else :
     #         speed[0] = 1 if direc == 1 else -1
     #         speed[1] = 0
-    end_game(head,body)
+    end_game(head,body,stamina)
 
     foods,stamina = eat_food(head,foods,body,stamina)
     draw_food(screen,foods)
