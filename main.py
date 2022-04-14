@@ -93,8 +93,78 @@ def first_slice(key,head,body):
         return head["position"]["y"]-1 != body["sections"][0][1]
     elif key == pygame.K_DOWN:
         return head["position"]["y"]+1 != body["sections"][0][1]
+def inputs_AI(head,body,food,speed):
+    inputs=[]
+    #danger LEFT
+    head_mov = [head["position"]["x"]+1,head["position"]["y"]]
+    if head["position"]["x"]+1 == int(width/SECTION_SIZE) or (body["sections"] and head_mov in body["sections"]):
+        inputs.append(1)
+    else:
+        inputs.append(0)
 
-foods = generate_food(head,body)
+    #danger RIGHT
+    head_mov = [head["position"]["x"]-1,head["position"]["y"]]
+    if head["position"]["x"]-1 == 0 or (body["sections"] and head_mov in body["sections"]):
+        inputs.append(1)
+    else:
+        inputs.append(0)
+    #danger UP
+    head_mov = [head["position"]["x"],head["position"]["y"]-1]
+    if head["position"]["y"]-1 == 0 or (body["sections"] and head_mov in body["sections"]):
+        inputs.append(1)
+    else:
+        inputs.append(0)
+    #danger DOWN
+    head_mov = [head["position"]["x"],head["position"]["y"]+1]
+    if head["position"]["y"]+1 == int(height/SECTION_SIZE) or (body["sections"] and head_mov in body["sections"]):
+        inputs.append(1)
+    else:
+        inputs.append(0)
+
+
+
+    # direction
+    if speed[0]==-1:
+        inputs.append(1)
+    else:
+        inputs.append(0)
+    if speed[0]==1:
+        inputs.append(1)
+    else:
+        inputs.append(0)
+    if speed[1]==-1:
+        inputs.append(1)
+    else:
+        inputs.append(0)
+    if speed[1]==1:
+        inputs.append(1)
+    else:
+        inputs.append(0)
+
+    # food 
+    if food[0]>head["position"]["x"]:
+        inputs.append(1)
+    else:
+        inputs.append(0)
+    if food[0]<head["position"]["x"]:
+        inputs.append(1)
+    else:
+        inputs.append(0)
+    if food[0]>head["position"]["y"]:
+        inputs.append(1)
+    else:
+        inputs.append(0)
+    if food[0]<head["position"]["y"]:
+        inputs.append(1)
+    else:
+        inputs.append(0)
+
+
+    print(inputs)
+    return inputs
+
+
+food = generate_food(head,body)
 draw_snake(screen,head,body)
 while 1:
     screen.fill(blackgrond_color)
@@ -146,10 +216,11 @@ while 1:
     #     else :
     #         speed[0] = 1 if direc == 1 else -1
     #         speed[1] = 0
+    inputs_AI(head,body,food,speed)
     end_game(head,body,stamina)
 
-    foods,stamina = eat_food(head,foods,body,stamina)
-    draw_food(screen,foods)
+    food,stamina = eat_food(head,food,body,stamina)
+    draw_food(screen,food)
     draw_snake(screen,head,body)
     stamina-=1
     print(stamina)
