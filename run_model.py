@@ -15,6 +15,6 @@ while True:
     game.game_draw()
     _ , done, _, _ = game.game_step_ai(final_move)
     if done:  
-        print(f"Max Foods:{game.snake.caught_foods}")
+        print(f"Max Foods:{len(game.snake.body_sections)}")
         game.reset()
     time.sleep(0.05)
