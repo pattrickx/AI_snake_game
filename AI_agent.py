@@ -19,7 +19,7 @@ class ai_agent:
         self.epsilon = 0 # randomness
         self.gamma = 0.9 #discont rate
         self.memory = deque(maxlen=MAX_MEMORY) # pop left
-        self.model = QNet(8,4,256)
+        self.model = QNet(10,4,256)
         if state_dict:
             self.model.load_state_dict(torch.load(state_dict))
         self.trainer = QTrainer(self.model)
@@ -40,7 +40,7 @@ class ai_agent:
         self.trainer.train_step(state,action,reward,next_state,done)
 
     def get_action(self,state):
-        self.epsilon = 80 - self.n_games
+        self.epsilon = 100 - self.n_games
         final_move = [0,0,0,0]
         if random.randint(0,200)<self.epsilon:
             # print("random")
