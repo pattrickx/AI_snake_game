@@ -12,11 +12,10 @@ class QNet(nn.Module):
 
             nn.Linear(in_features=input_size,out_features=hidden_size),
             nn.Tanh(),
-
             nn.Linear(in_features=hidden_size,out_features=hidden_size),
             nn.ReLU(),
-
-            nn.Linear(in_features=hidden_size,out_features=output_size))
+            nn.Linear(in_features=hidden_size,out_features=output_size),
+            )
         
     def forward(self, X):
         Y = self.fc(X)

@@ -6,7 +6,7 @@ import time
 
 agent = ai_agent()
 agent.model.load_state_dict(torch.load("QNet_model_best.pth"))
-game = snake_game()
+game = snake_game(width=200,height=200,section_size=50)
 
 while True:
     

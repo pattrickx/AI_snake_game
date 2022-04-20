@@ -19,7 +19,7 @@ class ai_agent:
         self.epsilon = 0 # randomness
         self.gamma = 0.9 #discont rate
         self.memory = deque(maxlen=MAX_MEMORY) # pop left
-        self.model = QNet(10,4,256)
+        self.model = QNet(6,4,256)
         if state_dict:
             self.model.load_state_dict(torch.load(state_dict))
         self.trainer = QTrainer(self.model)
@@ -73,9 +73,9 @@ def train():
     plot_mean_scores = []
     total_score = 0
     record = 0
-    agent = ai_agent()
-    # agent = ai_agent("QNet_model.pth")
-    game = snake_game()
+    # agent = ai_agent()
+    agent = ai_agent("QNet_model_best.pth")
+    game = snake_game(width=200,height=200,section_size=50)
 
     while True:
         
@@ -107,7 +107,7 @@ def train():
             plot_mean_scores.append(mean_score)
             plot_caught_foods.append(caught_foods)
             plot(plot_scores,plot_mean_scores,plot_caught_foods)
-        # time.sleep(0.05)
+        # time.sleep(0.5)
 
 
 
